@@ -1,9 +1,13 @@
-use data_structures::hash_map::HashMap;
+use data_structures::tree::Tree;
 
 fn main() {
-    let mut table = HashMap::new();
+    let mut tree = Tree::from(12);
 
-    table.insert(12, "Hello");
+    tree.insert(14);
+    tree.insert(12);
+    tree.insert(16);
+    tree.insert(19);
 
-    print!("{:?}", table.get(12));
+    println!("{:?}", tree.contains(19));
+    println!("{}", tree.len());
 }
