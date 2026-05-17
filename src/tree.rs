@@ -1,7 +1,7 @@
 use std::alloc::{Layout, alloc, dealloc};
 use std::ptr;
 
-struct Node<T: Ord> {
+pub struct Node<T: Ord> {
     left: *mut Node<T>,
     right: *mut Node<T>,
     data: T,
@@ -52,6 +52,19 @@ where
     pub fn len(&self) -> usize {
         self.len
     }
+
+    fn dealloc_tree(&mut self) {
+        dealloc_tree(self.root);
+    }
+}
+
+impl<T> Drop for Tree<T>
+where
+    T: Ord,
+{
+    fn drop(&mut self) {
+        self.dealloc_tree();
+    }
 }
 
 fn insert<T: Ord>(node: *mut *mut Node<T>, data: T) {
@@ -94,5 +107,20 @@ fn contains<T: Ord>(node: *mut Node<T>, data: T) -> bool {
         unsafe { contains((*node).left, data) }
     } else {
         unsafe { contains((*node).right, data) }
+    }
+}
+
+pub fn dealloc_tree<T: Ord>(node: *mut Node<T>) {
+    if node.is_null() {
+        return;
+    }
+
+    unsafe { dealloc_tree((*node).left) }
+    unsafe { dealloc_tree((*node).right) }
+
+    let layout = Layout::new::<Node<T>>();
+    unsafe {
+        std::ptr::drop_in_place(node);
+        dealloc(node as *mut u8, layout);
     }
 }
